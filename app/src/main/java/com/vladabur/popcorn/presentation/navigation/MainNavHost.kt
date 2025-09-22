@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.vladabur.popcorn.presentation.feature.main.MainRoute
 import com.vladabur.popcorn.presentation.navigation.graphs.MainNavGraph
 
 @Composable
@@ -21,7 +22,7 @@ fun MainNavHost(navHostController: NavHostController) {
         composable<MainNavGraph.Main>(
             enterTransition = { fadeIn() + scaleIn() },
             exitTransition = { fadeOut() + scaleOut() }) {
-            
+            MainRoute()
         }
     }
 }
