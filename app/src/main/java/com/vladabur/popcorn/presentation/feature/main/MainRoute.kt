@@ -1,7 +1,9 @@
 package com.vladabur.popcorn.presentation.feature.main
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +24,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vladabur.popcorn.R
 import com.vladabur.popcorn.presentation.common.base.BaseUiState
+import com.vladabur.popcorn.presentation.common.ui.components.ConnectionError
+import com.vladabur.popcorn.presentation.common.ui.components.ErrorSnackBar
 
 @Composable
 fun MainRoute(
@@ -30,7 +34,7 @@ fun MainRoute(
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     val baseState = viewModel.baseUiState.collectAsStateWithLifecycle()
     MainScreen(
-        uiState = uiState.value, 
+        uiState = uiState.value,
         baseUiState = baseState.value,
         onEvent = viewModel::onEvent
     )
@@ -48,38 +52,55 @@ fun MainScreen(
         stringResource(R.string.tab_all),
         stringResource(R.string.tab_favorites)
     )
-    TabRow(
-        selectedTabIndex = selectedTabIndex,
-        modifier = Modifier
-            .padding(vertical = 4.dp, horizontal = 8.dp)
-            .clip(RoundedCornerShape(50))
-            .padding(1.dp),
-        indicator = {
-            Box { }
-        }
-    ) {
-        tabsList.forEachIndexed { index, text ->
-            val selected = selectedTabIndex == index
-            val backgroundColor = if (selected)
-                MaterialTheme.colorScheme.primary
-            else
-                MaterialTheme.colorScheme.surface
-            val contentColor = if (selected)
-                MaterialTheme.colorScheme.onPrimary
-            else
-                MaterialTheme.colorScheme.onSurface
-
-            Tab(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(50))
-                    .background(
-                        backgroundColor
-                    ),
-                selected = selected,
-                onClick = { selectedTabIndex = index },
-                text = { Text(text = text, color = contentColor) }
+    Column {
+        AnimatedVisibility(baseUiState.isConnectionError == true) {
+            ConnectionError(
+                onRetry = {
+                    onEvent(MainUiEvent.Retry)
+                }
             )
         }
+        TabRow(
+            selectedTabIndex = selectedTabIndex,
+            modifier = Modifier
+                .padding(vertical = 4.dp, horizontal = 8.dp)
+                .clip(RoundedCornerShape(50))
+                .padding(1.dp),
+            indicator = {
+                Box { }
+            }
+        ) {
+            tabsList.forEachIndexed { index, text ->
+                val selected = selectedTabIndex == index
+                val backgroundColor = if (selected)
+                    MaterialTheme.colorScheme.primary
+                else
+                    MaterialTheme.colorScheme.surface
+                val contentColor = if (selected)
+                    MaterialTheme.colorScheme.onPrimary
+                else
+                    MaterialTheme.colorScheme.onSurface
+
+                Tab(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .background(
+                            backgroundColor
+                        ),
+                    selected = selected,
+                    onClick = { selectedTabIndex = index },
+                    text = { Text(text = text, color = contentColor) }
+                )
+            }
+        }
+    }
+    if (baseUiState.error != null) {
+        ErrorSnackBar(
+            error = baseUiState.error,
+            onDismissed = {
+                onEvent(MainUiEvent.Consume)
+            }
+        )
     }
 }
 
@@ -87,9 +108,9 @@ fun MainScreen(
 @Preview(showBackground = true)
 @Composable
 private fun MainScreenPreview() {
-   MainScreen(
-       uiState = MainUiState(),
-       baseUiState = BaseUiState(),
-       onEvent={}
-   )
+    MainScreen(
+        uiState = MainUiState(),
+        baseUiState = BaseUiState(),
+        onEvent = {}
+    )
 }

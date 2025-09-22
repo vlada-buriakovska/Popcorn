@@ -1,5 +1,9 @@
 <resources>
     <string name="app_name">Popcorn</string>
+
+    <string name="all_no_connection">You\'re offline. Viewing cached data.</string>
+    <string name="all_tap_to_reconnect">Tap to reconnect</string>
+    <string name="all_ok">OK</string>
     
     <string name="tab_all">All</string>
     <string name="tab_favorites">Favorites</string>
