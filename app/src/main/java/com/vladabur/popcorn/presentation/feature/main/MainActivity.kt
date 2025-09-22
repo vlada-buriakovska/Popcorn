@@ -1,4 +1,4 @@
-package com.vladabur.popcorn
+package com.vladabur.popcorn.presentation.feature.main
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -11,7 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.vladabur.popcorn.ui.theme.PopcornTheme
+import com.vladabur.popcorn.presentation.common.ui.theme.PopcornTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

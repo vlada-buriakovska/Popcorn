@@ -1,4 +1,4 @@
-package com.vladabur.popcorn.ui.theme
+package com.vladabur.popcorn.presentation.common.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
