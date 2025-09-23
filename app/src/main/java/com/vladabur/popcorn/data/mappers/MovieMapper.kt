@@ -12,18 +12,35 @@ fun MovieResponse.toMovieEntity(): MovieEntity {
         posterPath = this.posterPath,
         releaseDate = this.releaseDate,
         voteAverage = this.voteAverage,
-        voteCount = this.voteCount
+        voteCount = this.voteCount,
+        isFavorite = false
     )
 }
 
 fun MovieEntity.toMovie(): Movie {
     return Movie(
+        localId = this.localId,
         id = this.id,
         title = this.title,
         overview = this.overview,
         posterPath = this.posterPath,
         releaseDate = this.releaseDate?.toDate(),
         voteAverage = this.voteAverage,
-        voteCount = this.voteCount
+        voteCount = this.voteCount,
+        isFavorite = this.isFavorite,
+    )
+} 
+
+fun Movie.toMovieEntity(): MovieEntity {
+    return MovieEntity(
+        localId = this.localId,
+        id = this.id,
+        title = this.title,
+        overview = this.overview,
+        posterPath = this.posterPath,
+        releaseDate = this.releaseDate?.toText(),
+        voteAverage = this.voteAverage,
+        voteCount = this.voteCount,
+        isFavorite = this.isFavorite,
     )
 } 

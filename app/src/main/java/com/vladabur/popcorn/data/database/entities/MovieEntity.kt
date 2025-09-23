@@ -14,7 +14,8 @@ data class MovieEntity(
     val posterPath: String?,
     val releaseDate: String?,
     val voteAverage: Double?,
-    val voteCount: Int?
+    val voteCount: Int?,
+    val isFavorite: Boolean
 ) {
     companion object {
         const val ENTITY_NAME = "movies"

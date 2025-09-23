@@ -9,7 +9,7 @@ import com.vladabur.popcorn.data.database.entities.RemoteKeyEntity
 
 @Database(
     entities = [MovieEntity::class, RemoteKeyEntity::class],
-    version = 6,
+    version = 7,
 )
 abstract class AppDatabase : RoomDatabase() {
     companion object {

@@ -8,3 +8,8 @@ fun String.toDate(): Date? {
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     return dateFormat.parse(this)
 } 
+
+fun Date.toText(): String? {
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    return dateFormat.format(this)
+} 

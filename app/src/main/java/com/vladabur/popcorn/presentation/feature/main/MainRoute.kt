@@ -1,6 +1,5 @@
 package com.vladabur.popcorn.presentation.feature.main
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,11 +25,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.vladabur.popcorn.R
 import com.vladabur.popcorn.presentation.common.base.BaseUiState
-import com.vladabur.popcorn.presentation.common.ui.components.ConnectionError
 import com.vladabur.popcorn.presentation.common.ui.components.ErrorSnackBar
 import com.vladabur.popcorn.presentation.extensions.errorMessage
-import com.vladabur.popcorn.presentation.extensions.hasConnectionError
+import com.vladabur.popcorn.presentation.feature.main.MainTabs.ALL
+import com.vladabur.popcorn.presentation.feature.main.MainTabs.FAVORITE
+import com.vladabur.popcorn.presentation.feature.main.MainUiEvent.Consume
 import com.vladabur.popcorn.presentation.feature.main.tabs.AllTab
+import com.vladabur.popcorn.presentation.feature.main.tabs.FavoriteTab
 
 enum class MainTabs(val nameResource: Int) {
     ALL(R.string.tab_all),
@@ -57,19 +58,13 @@ fun MainScreen(
     baseUiState: BaseUiState,
     onEvent: (MainUiEvent) -> Unit,
 ) {
-    var selectedTab by remember { mutableStateOf(MainTabs.ALL) }
+    var selectedTab by remember { mutableStateOf(ALL) }
     val listState = rememberLazyListState()
+    val favoriteMovieListState = rememberLazyListState()
     val movieListItems = uiState.movies.collectAsLazyPagingItems()
+    val favoriteMovieListItems = uiState.movies.collectAsLazyPagingItems()
 
     Column {
-        AnimatedVisibility(baseUiState.isConnectionError == true || movieListItems.hasConnectionError()) {
-            ConnectionError(
-                onRetry = {
-                    onEvent(MainUiEvent.Retry)
-                    movieListItems.retry()
-                }
-            )
-        }
         TabRow(
             selectedTabIndex = MainTabs.entries.indexOf(selectedTab),
             modifier = Modifier
@@ -104,24 +99,34 @@ fun MainScreen(
             }
         }
         when (selectedTab) {
-            MainTabs.ALL -> {
+            ALL -> {
                 AllTab(
                     uiState = uiState,
-                    listState = listState
+                    listState = listState,
+                    onEvent = onEvent
                 )
             }
 
-            MainTabs.FAVORITE -> {
-                //TODO
+            FAVORITE -> {
+                FavoriteTab(
+                    uiState = uiState,
+                    listState = favoriteMovieListState,
+                    onEvent = onEvent
+                )
             }
         }
     }
-    if (baseUiState.error != null || movieListItems.errorMessage() != null) {
+    if (baseUiState.error != null
+        || movieListItems.errorMessage() != null
+        || favoriteMovieListItems.errorMessage() != null
+    ) {
         ErrorSnackBar(
             error = baseUiState.error
-                ?: movieListItems.errorMessage() ?: String(),
+                ?: movieListItems.errorMessage()
+                ?: favoriteMovieListItems.errorMessage()
+                ?: String(),
             onDismissed = {
-                onEvent(MainUiEvent.Consume)
+                onEvent(Consume)
             }
         )
     }

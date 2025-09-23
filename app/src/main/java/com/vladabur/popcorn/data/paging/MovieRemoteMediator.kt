@@ -10,7 +10,6 @@ import com.vladabur.popcorn.data.database.entities.MovieEntity
 import com.vladabur.popcorn.data.database.entities.RemoteKeyEntity
 import com.vladabur.popcorn.data.mappers.toMovieEntity
 import com.vladabur.popcorn.data.services.MovieService
-import kotlinx.coroutines.delay
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -25,7 +24,6 @@ class MovieRemoteMediator(
         state: PagingState<Int, MovieEntity>
     ): MediatorResult {
         return try {
-            delay(2000)
             val page = when (loadType) {
                 LoadType.REFRESH -> 1
                 LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
@@ -40,20 +38,22 @@ class MovieRemoteMediator(
             val endOfPaginationReached = movies.isNullOrEmpty()
 
             appDatabase.withTransaction {
+                val moviesEntities = movies?.map { movie ->
+                    val entity = appDatabase.movieDao().getMovieById(movie.id)
+                    movie.toMovieEntity().copy(isFavorite = entity?.isFavorite == true)
+                }
                 if (loadType == LoadType.REFRESH) {
                     appDatabase.movieDao().clearAll()
                     appDatabase.remoteKeyDao().clearAll()
                 }
-                movies?.let {
-                    appDatabase.movieDao().upsertAll(movies.map { it.toMovieEntity() })
-                }
+                moviesEntities?.let { appDatabase.movieDao().upsertAll(it) }
                 val nextKey = if (endOfPaginationReached) null else moviesResponse.page + 1
                 appDatabase.remoteKeyDao().insertOrReplace(RemoteKeyEntity(nextKey = nextKey))
             }
             MediatorResult.Success(endOfPaginationReached = endOfPaginationReached)
         } catch (e: IOException) {
             MediatorResult.Error(e)
-        }catch (e: HttpException){
+        } catch (e: HttpException) {
             MediatorResult.Error(e)
         }
     }
