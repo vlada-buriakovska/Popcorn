@@ -50,6 +50,7 @@ android {
             dimension = "main"
             buildConfigField("String", "BASE_URL", "\"https://api.themoviedb.org/3/\"")
             buildConfigField("String", "BASE_IMAGE_URL", "\"https://image.tmdb.org/t/p/original\"")
+            buildConfigField("String", "SHARE_URL_PREFIX", "\"https://www.themoviedb.org/movie/\"")
             buildConfigField("String", "API_ACCESS_TOKEN", properties.getProperty("API_ACCESS_TOKEN"))
         }
     }

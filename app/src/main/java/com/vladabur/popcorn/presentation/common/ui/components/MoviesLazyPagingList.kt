@@ -72,7 +72,8 @@ fun MoviesLazyPagingList(
     movieListItems: LazyPagingItems<Movie>,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
-    onFavouriteClicked: (Movie) -> Unit
+    onFavouriteClicked: (Movie) -> Unit,
+    onShareClicked: (Movie) -> Unit
 ) {
     val isLoading =
         movieListItems.loadState.refresh is Loading && movieListItems.itemCount == 0
@@ -114,6 +115,7 @@ fun MoviesLazyPagingList(
                         MovieListItem(
                             movie = movie,
                             onFavouriteClicked = onFavouriteClicked,
+                            onShareClicked = onShareClicked
                         )
                     }
                 }
@@ -157,7 +159,8 @@ private fun DateListItem(date: Date) {
 @Composable
 private fun MovieListItem(
     movie: Movie,
-    onFavouriteClicked: (Movie) -> Unit
+    onFavouriteClicked: (Movie) -> Unit,
+    onShareClicked: (Movie) -> Unit
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -228,7 +231,7 @@ private fun MovieListItem(
                         modifier = Modifier.padding(4.dp),
                         colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surface),
                         onClick = {
-
+                            onShareClicked(movie)
                         }) {
                         Icon(
                             Icons.Default.Share,
@@ -420,8 +423,7 @@ private fun MovieListItemPreview(
 ) {
     MovieListItem(
         movie = movie,
-        onFavouriteClicked = { _ ->
-
-        }
+        onFavouriteClicked = {},
+        onShareClicked = {}
     )
 }
