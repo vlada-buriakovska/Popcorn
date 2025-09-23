@@ -48,7 +48,8 @@ android {
     productFlavors {
         create("prod") {
             dimension = "main"
-            buildConfigField("String", "BASE_URL", "\"https://api.themoviedb.org/3\"")
+            buildConfigField("String", "BASE_URL", "\"https://api.themoviedb.org/3/\"")
+            buildConfigField("String", "BASE_IMAGE_URL", "\"https://image.tmdb.org/t/p/original\"")
             buildConfigField("String", "API_ACCESS_TOKEN", properties.getProperty("API_ACCESS_TOKEN"))
         }
     }
@@ -93,6 +94,16 @@ dependencies {
 
     implementation(libs.kotlinx.serialization.json)
 
+    //Paging
+    implementation(libs.paging.runtime)
+    implementation(libs.paging.compose)
+
+    //Coil
+    implementation(libs.coil.compose)
+
+
+    //Compose
+    implementation(libs.androidx.compose.material)
     
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
