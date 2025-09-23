@@ -10,4 +10,6 @@
 
     <string name="average_vote_formatter">%.1f</string>
     <string name="vote_count_formatter">(%d)</string>
+    
+    <string name="share_subject">Movie Recommendation</string>
 </resources>

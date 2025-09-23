@@ -4,7 +4,6 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import androidx.paging.RemoteMediator.InitializeAction.SKIP_INITIAL_REFRESH
 import androidx.room.withTransaction
 import com.vladabur.popcorn.data.database.AppDatabase
 import com.vladabur.popcorn.data.database.entities.MovieEntity
@@ -20,7 +19,12 @@ class MovieRemoteMediator(
     private val appDatabase: AppDatabase
 ) : RemoteMediator<Int, MovieEntity>() {
     override suspend fun initialize(): InitializeAction {
-        return SKIP_INITIAL_REFRESH
+        val remoteKey = appDatabase.remoteKeyDao().getRemoteKey()
+        return if (remoteKey == null) {
+            InitializeAction.LAUNCH_INITIAL_REFRESH
+        } else {
+            InitializeAction.SKIP_INITIAL_REFRESH
+        }
     }
 
     override suspend fun load(
