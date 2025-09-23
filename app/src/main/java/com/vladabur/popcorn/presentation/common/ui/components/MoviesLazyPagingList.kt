@@ -1,5 +1,6 @@
 package com.vladabur.popcorn.presentation.common.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,6 +21,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
@@ -34,6 +37,10 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -104,7 +111,10 @@ fun MoviesLazyPagingList(
                         ) {
                             item.releaseDate?.let { DateListItem(it) }
                         }
-                        MovieListItem(movie = movie, onFavouriteClicked = onFavouriteClicked)
+                        MovieListItem(
+                            movie = movie,
+                            onFavouriteClicked = onFavouriteClicked,
+                        )
                     }
                 }
 
@@ -149,6 +159,8 @@ private fun MovieListItem(
     movie: Movie,
     onFavouriteClicked: (Movie) -> Unit
 ) {
+    var isExpanded by remember { mutableStateOf(false) }
+
     ElevatedCard(
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.elevatedCardColors(
@@ -158,6 +170,9 @@ private fun MovieListItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 24.dp, vertical = 8.dp)
+            .clickable {
+                isExpanded = !isExpanded
+            }
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -269,18 +284,39 @@ private fun MovieListItem(
                 }
             }
             if (!movie.overview.isNullOrEmpty()) {
+                val maxLines = if (isExpanded) {
+                    Int.MAX_VALUE
+                } else {
+                    3
+                }
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp),
-                    style = AppTypography.bodyMedium.copy(
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    ),
-                    text = movie.overview,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1F)
+                            .padding(horizontal = 8.dp),
+                        style = AppTypography.bodyMedium.copy(
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        ),
+                        text = movie.overview,
+                        maxLines = maxLines,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    val expandIcon = if (isExpanded) {
+                        Icons.Default.KeyboardArrowUp
+                    } else {
+                        Icons.Default.KeyboardArrowDown
+                    }
+                    Icon(
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp)
+                            .size(24.dp),
+                        imageVector = expandIcon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(8.dp))
         }
