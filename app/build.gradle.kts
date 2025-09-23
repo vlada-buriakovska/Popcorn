@@ -1,6 +1,9 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
 
+val properties = Properties()
+properties.load(project.rootProject.file("secret.properties").inputStream())
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -23,10 +26,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-
     signingConfigs {
-        val properties = Properties()
-        properties.load(project.rootProject.file("secret.properties").inputStream())
 
         create("release") {
             storeFile = file(properties.getProperty("RELEASE_STORE_FILE"))
@@ -49,6 +49,7 @@ android {
         create("prod") {
             dimension = "main"
             buildConfigField("String", "BASE_URL", "\"https://api.themoviedb.org/3\"")
+            buildConfigField("String", "API_ACCESS_TOKEN", properties.getProperty("API_ACCESS_TOKEN"))
         }
     }
     compileOptions {

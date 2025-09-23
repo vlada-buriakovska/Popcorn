@@ -23,6 +23,10 @@ object NetworkModule {
     fun provideRequestInterceptor(): Interceptor {
         return Interceptor { chain ->
             val builder = chain.request().newBuilder()
+            builder.apply {
+                addHeader("accept", "application/json")
+                addHeader("Authorization", "Bearer ${BuildConfig.API_ACCESS_TOKEN}")
+            }
             chain.proceed(builder.build())
         }
     }
