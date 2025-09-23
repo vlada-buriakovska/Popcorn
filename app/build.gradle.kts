@@ -98,10 +98,17 @@ dependencies {
     implementation(libs.paging.runtime)
     implementation(libs.paging.compose)
 
+
+    //Room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+    annotationProcessor(libs.compiler)
+    implementation(libs.androidx.room.paging)
+    
     //Coil
     implementation(libs.coil.compose)
-
-
+    
     //Compose
     implementation(libs.androidx.compose.material)
     

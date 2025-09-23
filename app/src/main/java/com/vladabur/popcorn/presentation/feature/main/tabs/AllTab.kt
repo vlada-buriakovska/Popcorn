@@ -52,11 +52,10 @@ import com.vladabur.popcorn.R
 import com.vladabur.popcorn.domain.models.movie.Movie
 import com.vladabur.popcorn.presentation.common.preview.preview.MoviePreviewProvider
 import com.vladabur.popcorn.presentation.common.ui.theme.AppTypography
+import com.vladabur.popcorn.presentation.extensions.isSameMonthAndYear
 import com.vladabur.popcorn.presentation.extensions.shimmerEffect
 import com.vladabur.popcorn.presentation.extensions.toYearAndMonth
 import com.vladabur.popcorn.presentation.feature.main.MainUiState
-import com.vladabur.popcorn.presentation.feature.main.MovieListItem.DateItem
-import com.vladabur.popcorn.presentation.feature.main.MovieListItem.MovieItem
 import java.util.Date
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -66,23 +65,22 @@ fun AllTab(
     uiState: MainUiState,
 ) {
     val movieListItems = uiState.movies.collectAsLazyPagingItems()
+
     val isLoading =
-        movieListItems.loadState.refresh is LoadState.Loading && movieListItems.itemCount == 0
-    val isRefreshing =
-        movieListItems.loadState.refresh is LoadState.Loading && movieListItems.itemCount > 0
+        movieListItems.loadState.refresh is LoadState.Loading && movieListItems.itemCount <= 20
+    val isRefreshing = movieListItems.loadState.refresh is LoadState.Loading && !isLoading
+    val isAppending = movieListItems.loadState.append is LoadState.Loading
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isRefreshing, onRefresh = {
             movieListItems.refresh()
-        }
-    )
+        })
     Box(
         modifier = Modifier
             .fillMaxSize()
             .pullRefresh(pullRefreshState)
     ) {
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             state = listState,
         ) {
             if (isLoading) {
@@ -94,28 +92,30 @@ fun AllTab(
                 items(
                     count = movieListItems.itemCount,
                 ) { index ->
-                    when (val item = movieListItems[index]) {
-                        is DateItem -> {
-                            item.date?.let { DateListItem(it) }
-                        }
+                    val item = movieListItems[index]
 
-                        is MovieItem -> {
-                            MovieListItem(item.movie)
+                    item?.let { movie ->
+                        if (index == 0 ||
+                            !item.releaseDate.isSameMonthAndYear(
+                                movieListItems[index - 1]?.releaseDate
+                            )
+                        ) {
+                            item.releaseDate?.let { DateListItem(it) }
                         }
-
-                        null -> {}
+                        MovieListItem(movie)
                     }
                 }
-            }
-            if (movieListItems.loadState.append is LoadState.Loading) {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
+
+                if (isAppending) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
                     }
                 }
             }
@@ -158,8 +158,7 @@ private fun MovieListItem(movie: Movie) {
             modifier = Modifier.fillMaxWidth(),
         ) {
             Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.TopEnd
+                modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopEnd
             ) {
                 if (movie.posterPath.isNullOrEmpty()) {
                     Icon(
@@ -185,8 +184,7 @@ private fun MovieListItem(movie: Movie) {
                         colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surface),
                         onClick = {
 
-                        }
-                    ) {
+                        }) {
                         Icon(
                             Icons.Default.FavoriteBorder,
                             contentDescription = null,
@@ -198,8 +196,7 @@ private fun MovieListItem(movie: Movie) {
                         colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surface),
                         onClick = {
 
-                        }
-                    ) {
+                        }) {
                         Icon(
                             Icons.Default.Share,
                             contentDescription = null,
@@ -222,8 +219,7 @@ private fun MovieListItem(movie: Movie) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         movie.voteAverage?.let { voteAverage ->
                             Icon(
-                                modifier = Modifier
-                                    .size(24.dp),
+                                modifier = Modifier.size(24.dp),
                                 imageVector = Icons.Default.Star,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onSurface
@@ -231,15 +227,13 @@ private fun MovieListItem(movie: Movie) {
 
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                modifier = Modifier
-                                    .padding(end = 2.dp),
+                                modifier = Modifier.padding(end = 2.dp),
                                 style = AppTypography.titleSmall,
                                 text = stringResource(R.string.average_vote_formatter, voteAverage)
                             )
                             movie.voteCount?.let { voteCount ->
                                 Text(
-                                    modifier = Modifier
-                                        .padding(end = 8.dp),
+                                    modifier = Modifier.padding(end = 8.dp),
                                     style = AppTypography.titleSmall.copy(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     ),

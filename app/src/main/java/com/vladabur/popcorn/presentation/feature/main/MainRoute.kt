@@ -23,18 +23,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.vladabur.popcorn.R
 import com.vladabur.popcorn.presentation.common.base.BaseUiState
 import com.vladabur.popcorn.presentation.common.ui.components.ConnectionError
 import com.vladabur.popcorn.presentation.common.ui.components.ErrorSnackBar
-import com.vladabur.popcorn.presentation.extensions.getMessage
+import com.vladabur.popcorn.presentation.extensions.errorMessage
 import com.vladabur.popcorn.presentation.extensions.hasConnectionError
 import com.vladabur.popcorn.presentation.feature.main.tabs.AllTab
-import kotlin.Int
-import kotlin.String
-import kotlin.Unit
 
 enum class MainTabs(val nameResource: Int) {
     ALL(R.string.tab_all),
@@ -120,25 +116,10 @@ fun MainScreen(
             }
         }
     }
-    val errorMessage = when {
-        movieListItems.loadState.refresh is LoadState.Error -> {
-            val e = movieListItems.loadState.refresh as LoadState.Error
-            e.error.getMessage()
-        }
-
-        movieListItems.loadState.append is LoadState.Error -> {
-            val e = movieListItems.loadState.append as LoadState.Error
-            e.error.getMessage()
-        }
-
-        else -> {
-            null
-        }
-    }
-    if (baseUiState.error != null || errorMessage != null) {
+    if (baseUiState.error != null || movieListItems.errorMessage() != null) {
         ErrorSnackBar(
             error = baseUiState.error
-                ?: errorMessage ?: String(),
+                ?: movieListItems.errorMessage() ?: String(),
             onDismissed = {
                 onEvent(MainUiEvent.Consume)
             }
