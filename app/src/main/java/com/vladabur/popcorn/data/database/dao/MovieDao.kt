@@ -23,7 +23,7 @@ interface MovieDao {
     suspend fun updateMovie(movie: MovieEntity)
     
     @Upsert
-    suspend fun upsertAll(characters: List<MovieEntity>)
+    suspend fun upsertAll(movies: List<MovieEntity>)
 
     @Query("DELETE FROM ${MovieEntity.ENTITY_NAME}")
     suspend fun clearAll()
