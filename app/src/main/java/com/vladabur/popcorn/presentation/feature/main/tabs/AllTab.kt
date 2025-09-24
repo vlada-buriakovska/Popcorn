@@ -1,6 +1,6 @@
 package com.vladabur.popcorn.presentation.feature.main.tabs
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,14 +37,16 @@ fun AllTab(
 ) {
     val movieListItems = uiState.movies.collectAsLazyPagingItems()
     val context = LocalContext.current
-    AnimatedVisibility(
+    Crossfade(
         movieListItems.hasConnectionError()
     ) {
-        ConnectionError(
-            onRetry = {
-                movieListItems.retry()
-            }
-        )
+        if (it) {
+            ConnectionError(
+                onRetry = {
+                    movieListItems.retry()
+                }
+            )
+        }
     }
     MoviesLazyPagingList(
         movieListItems = movieListItems,

@@ -1,5 +1,6 @@
 package com.vladabur.popcorn.presentation.common.ui.components
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,6 +54,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState.Loading
+import androidx.paging.LoadState.NotLoading
 import androidx.paging.compose.LazyPagingItems
 import coil.compose.AsyncImage
 import com.vladabur.popcorn.BuildConfig
@@ -65,7 +67,6 @@ import com.vladabur.popcorn.presentation.extensions.shimmerEffect
 import com.vladabur.popcorn.presentation.extensions.toYearAndMonth
 import java.util.Date
 
-
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MoviesLazyPagingList(
@@ -76,12 +77,17 @@ fun MoviesLazyPagingList(
     onShareClicked: (Movie) -> Unit,
     emptyListPlaceholder: (@Composable () -> Unit)? = null
 ) {
-    val isLoading =
-        movieListItems.loadState.refresh is Loading && movieListItems.itemCount == 0
+    val isListEmpty = movieListItems.itemSnapshotList.isEmpty()
+    val isEndReached = movieListItems.loadState.append.endOfPaginationReached
+
+    val isLoading = movieListItems.loadState.refresh is Loading && isListEmpty
     val isRefreshing = movieListItems.loadState.refresh is Loading && !isLoading
     val isAppending = movieListItems.loadState.append is Loading
+    val isEmpty = movieListItems.loadState.refresh is NotLoading && isListEmpty && isEndReached
+
     val pullRefreshState = rememberPullRefreshState(
-        refreshing = isRefreshing, onRefresh = {
+        refreshing = isRefreshing,
+        onRefresh = {
             movieListItems.refresh()
         }
     )
@@ -90,21 +96,29 @@ fun MoviesLazyPagingList(
             .fillMaxSize()
             .pullRefresh(pullRefreshState)
     ) {
-        if (emptyListPlaceholder != null && movieListItems.itemSnapshotList.isEmpty()) {
-            emptyListPlaceholder()
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                state = listState,
-            ) {
-                if (isLoading) {
-                    items(5) {
-                        DateListItemPlaceholder()
-                        MovieListItemPlaceholder()
+        Crossfade(isEmpty) {
+            if (it) {
+                emptyListPlaceholder?.invoke()
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    state = listState,
+                ) {
+                    if (isLoading) {
+                        items(
+                            count = 5,
+                            key = { index -> index }
+                        ) {
+                            DateListItemPlaceholder()
+                            MovieListItemPlaceholder()
+                        }
                     }
-                } else {
                     items(
                         count = movieListItems.itemCount,
+                        key = { index ->
+                            val item = movieListItems[index]
+                            item?.id ?: index
+                        }
                     ) { index ->
                         val item = movieListItems[index]
 
@@ -114,7 +128,7 @@ fun MoviesLazyPagingList(
                                     movieListItems[index - 1]?.releaseDate
                                 )
                             ) {
-                                item.releaseDate?.let { DateListItem(it) }
+                                item.releaseDate?.let { date -> DateListItem(date) }
                             }
                             MovieListItem(
                                 movie = movie,
@@ -124,16 +138,20 @@ fun MoviesLazyPagingList(
                         }
                     }
 
-                    if (isAppending) {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator()
+                    item {
+                        when {
+                            isAppending -> {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator()
+                                }
                             }
+
+                            else -> {}
                         }
                     }
                 }
