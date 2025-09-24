@@ -27,7 +27,6 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     signingConfigs {
-
         create("release") {
             storeFile = file(properties.getProperty("RELEASE_STORE_FILE"))
             storePassword = properties.getProperty("RELEASE_STORE_PASSWORD")
@@ -42,6 +41,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     flavorDimensions.add("main")

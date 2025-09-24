@@ -7,6 +7,7 @@
     
     <string name="tab_all">All</string>
     <string name="tab_favorites">Favorites</string>
+    <string name="all_empty">No data</string>
     <string name="favorites_empty">You haven\'t added any favorite movies yet</string>
 
     <string name="average_vote_formatter">%.1f</string>

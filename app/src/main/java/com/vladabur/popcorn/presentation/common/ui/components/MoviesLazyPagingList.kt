@@ -1,9 +1,6 @@
 package com.vladabur.popcorn.presentation.common.ui.components
 
-import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -50,10 +47,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextAlign.Companion
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -79,7 +73,8 @@ fun MoviesLazyPagingList(
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
     onFavouriteClicked: (Movie) -> Unit,
-    onShareClicked: (Movie) -> Unit
+    onShareClicked: (Movie) -> Unit,
+    emptyListPlaceholder: (@Composable () -> Unit)? = null
 ) {
     val isLoading =
         movieListItems.loadState.refresh is Loading && movieListItems.itemCount == 0
@@ -95,71 +90,49 @@ fun MoviesLazyPagingList(
             .fillMaxSize()
             .pullRefresh(pullRefreshState)
     ) {
-        Crossfade(movieListItems.itemSnapshotList.isEmpty()) {
-            if (it) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Image(
-                        modifier = Modifier.size(120.dp),
-                        painter = painterResource(R.drawable.ic_hearts),
-                        contentDescription = null
-                    )
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp),
-                        text = stringResource(R.string.favorites_empty),
-                        style = AppTypography.titleMedium,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    state = listState,
-                ) {
-                    if (isLoading) {
-                        items(5) {
-                            DateListItemPlaceholder()
-                            MovieListItemPlaceholder()
-                        }
-                    } else {
-                        items(
-                            count = movieListItems.itemCount,
-                        ) { index ->
-                            val item = movieListItems[index]
+        if (emptyListPlaceholder != null && movieListItems.itemSnapshotList.isEmpty()) {
+            emptyListPlaceholder()
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                state = listState,
+            ) {
+                if (isLoading) {
+                    items(5) {
+                        DateListItemPlaceholder()
+                        MovieListItemPlaceholder()
+                    }
+                } else {
+                    items(
+                        count = movieListItems.itemCount,
+                    ) { index ->
+                        val item = movieListItems[index]
 
-                            item?.let { movie ->
-                                if (index == 0 ||
-                                    !item.releaseDate.isSameMonthAndYear(
-                                        movieListItems[index - 1]?.releaseDate
-                                    )
-                                ) {
-                                    item.releaseDate?.let { DateListItem(it) }
-                                }
-                                MovieListItem(
-                                    movie = movie,
-                                    onFavouriteClicked = onFavouriteClicked,
-                                    onShareClicked = onShareClicked
+                        item?.let { movie ->
+                            if (index == 0 ||
+                                !item.releaseDate.isSameMonthAndYear(
+                                    movieListItems[index - 1]?.releaseDate
                                 )
+                            ) {
+                                item.releaseDate?.let { DateListItem(it) }
                             }
+                            MovieListItem(
+                                movie = movie,
+                                onFavouriteClicked = onFavouriteClicked,
+                                onShareClicked = onShareClicked
+                            )
                         }
+                    }
 
-                        if (isAppending) {
-                            item {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator()
-                                }
+                    if (isAppending) {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
                             }
                         }
                     }

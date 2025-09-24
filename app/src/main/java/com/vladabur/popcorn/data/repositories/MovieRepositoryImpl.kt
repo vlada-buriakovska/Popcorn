@@ -25,6 +25,8 @@ class MovieRepositoryImpl @Inject constructor(
             Pager(
                 config = PagingConfig(
                     pageSize = 20,
+                    initialLoadSize = 20,
+                    prefetchDistance = 0
                 ),
                 remoteMediator = MovieRemoteMediator(
                     movieService = movieService,

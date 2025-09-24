@@ -10,6 +10,7 @@ import com.vladabur.popcorn.data.database.entities.MovieEntity
 import com.vladabur.popcorn.data.database.entities.RemoteKeyEntity
 import com.vladabur.popcorn.data.mappers.toMovieEntity
 import com.vladabur.popcorn.data.services.MovieService
+import kotlinx.coroutines.delay
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -41,6 +42,8 @@ class MovieRemoteMediator(
                         ?: return MediatorResult.Success(endOfPaginationReached = true)
                 }
             }
+            //FIXME just to show loading process
+            delay(3000)
             val moviesResponse = movieService.getMovies(page)
             val movies = moviesResponse.results
             val endOfPaginationReached = movies.isNullOrEmpty()
